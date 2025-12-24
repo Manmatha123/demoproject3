@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Run LWJGL Golf Simulation",
+      "request": "launch",
+      "mainClass": "engineTester.MainGameLoop",
+      "cwd": "${workspaceFolder}",
+      "vmArgs": "-Djava.library.path=E:/lwjgl/Golf-Ball-Simulation/lib/natives"
+    }
+  ]
+}
