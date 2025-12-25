@@ -176,9 +176,6 @@ public class Player extends Entity {
             if (v.x == 0 && v.z == 0 && (verticalAngle % 180) == 0)
                 v.y = 0;
 
-
-
-
             dx = (float) (v.x * dt * Math.cos(Math.toRadians(verticalAngle + reboundAngle)) * Math.sin(Math.toRadians(horizontalAngle)));
             dy = (float) (v.y * dt * Math.sin(Math.toRadians(verticalAngle)));
             dz = (float) (v.z * dt * Math.cos(Math.toRadians(verticalAngle + reboundAngle)) * Math.cos(Math.toRadians(horizontalAngle)));

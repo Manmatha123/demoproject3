@@ -110,11 +110,8 @@ public class MainGameLoop {
 
         while (!Display.isCloseRequested()) {
 
-
             camera.move();
-
             golfBall.move();
-
 
             renderer.processTerrain(terrain);
 
