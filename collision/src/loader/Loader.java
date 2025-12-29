@@ -82,10 +82,15 @@ public class Loader {
         return vaoID;
     }
 
-    public int loadTexture(String fileName) {
+    public int loadTexture(String fileName,FileType fileType) {
         Texture texture = null;
         try {
-            texture = TextureLoader.getTexture("PNG", new FileInputStream("res/" + fileName + ".png"));
+            if(fileType.equals(FileType.PNG)){
+                texture = TextureLoader.getTexture("PNG", new FileInputStream("res/" + fileName + ".png"));
+            }else if(fileType.equals(FileType.JPG)){
+                texture = TextureLoader.getTexture("JPG", new FileInputStream("res/" + fileName + ".jpg"));
+            }
+
             GL30.glGenerateMipmap(GL11.GL_TEXTURE_2D);
             GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_LINEAR);
             GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL14.GL_MAX_TEXTURE_LOD_BIAS, -0.4f);

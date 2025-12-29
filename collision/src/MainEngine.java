@@ -12,6 +12,7 @@ import entities.Camera;
 import entities.Entity;
 import entities.Light;
 import entities.Player;
+import loader.FileType;
 import loader.Loader;
 import loader.MasterRenderer;
 import models.RawModel;
@@ -32,12 +33,14 @@ public class MainEngine {
 
             RawModel fieldModel = OBJFileLoader.loadOBJ("uploads_files_2708212_terrain", loader);
             TexturedModel fieldTexture = new TexturedModel(fieldModel,
-                    new ModelTexture(loader.loadTexture("terrain/blendMap")).setHasTransparency(false).setShineDamper(1)
+                    new ModelTexture(loader.loadTexture("terrain/blendMap", FileType.PNG)).setHasTransparency(false)
+                            .setShineDamper(1)
                             .setReflectivity(1));
 
             RawModel treeModel = OBJFileLoader.loadOBJ("lowPolyTree", loader);
             TexturedModel treeTexture = new TexturedModel(treeModel,
-                    new ModelTexture(loader.loadTexture("lowPolyTree")).setHasTransparency(false).setShineDamper(1)
+                    new ModelTexture(loader.loadTexture("lowPolyTree", FileType.PNG)).setHasTransparency(false)
+                            .setShineDamper(1)
                             .setReflectivity(1));
 
             List<Entity> treesEntity = new ArrayList<>();
@@ -52,11 +55,17 @@ public class MainEngine {
 
             RawModel ballModel = OBJFileLoader.loadOBJ("ball", loader);
             TexturedModel ballTexture = new TexturedModel(ballModel,
-                    new ModelTexture(loader.loadTexture("ball")).setHasTransparency(false).setShineDamper(100)
+                    new ModelTexture(loader.loadTexture("human_texture", FileType.PNG)).setHasTransparency(false)
+                            .setShineDamper(100)
                             .setReflectivity(1));
 
-            // Entity ballEntity = new Entity(ballTexture, new Vector3f(-200, 10, -200), 1,
-            // 0, 0, 0);
+            RawModel sunModel = OBJFileLoader.loadOBJ("ball", loader);
+            TexturedModel sunTexture = new TexturedModel(sunModel,
+                    new ModelTexture(loader.loadTexture("13913_Sun_diff", FileType.JPG)).setHasTransparency(false)
+                            .setShineDamper(100)
+                            .setReflectivity(1));
+            Entity sunEntity = new Entity(sunTexture, new Vector3f(-200, 100, -200), 6,
+                    0, 0, 0);
 
             Player player = new Player(
                     ballTexture,
@@ -81,7 +90,8 @@ public class MainEngine {
                 }
             }
 
-            Light light = new Light(new Vector3f(0, 1000000, 0), new Vector3f(1, 1, 1));
+            Light light = new Light(new Vector3f(-200, 1000000000, -200), new Vector3f(1, 1, 1),
+                    new Vector3f(1.0f, 0.0001f, 0.00001f));
 
             MasterRenderer masterrender = new MasterRenderer();
 
@@ -101,7 +111,7 @@ public class MainEngine {
                         break;
                     }
                 }
-       
+
                 if (isCollide) {
                     player.setPosition(oldPos);
                     player.getAABB().update(oldPos, player.getSize());
@@ -118,6 +128,7 @@ public class MainEngine {
                 masterrender.processEntity(player);
 
                 masterrender.render(light, camera);
+                masterrender.renderSun(sunEntity, camera);
                 DisplayManager.updateDisplay();
                 // DisplayManager.updateDisplay();
             }
@@ -129,10 +140,10 @@ public class MainEngine {
     }
 
     private static void handleGroundCollision(Player player) {
-    Vector3f pos = player.getPosition();
-    pos.y = 0;  // ground height
-    player.setPosition(pos);
-}
+        Vector3f pos = player.getPosition();
+        pos.y = 0; // ground height
+        player.setPosition(pos);
+    }
 
     private static void updateTerrain(List<Entity> tiles, Entity player) {
         for (Entity tile : tiles) {

@@ -44,7 +44,7 @@ public class OBJFileLoader {
 			while (true) {
 				line = reader.readLine();
 				if (line.startsWith("v ")) {
-					String[] currentLine = line.split(" ");
+					String[] currentLine = line.split("\\s+");
 					float x = Float.parseFloat(currentLine[1]);
 					float y = Float.parseFloat(currentLine[2]);
 					float z = Float.parseFloat(currentLine[3]);
