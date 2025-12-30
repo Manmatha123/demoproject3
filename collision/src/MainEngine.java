@@ -12,9 +12,11 @@ import entities.Camera;
 import entities.Entity;
 import entities.Light;
 import entities.Player;
+// import loader.BloomRenderer;
 import loader.FileType;
 import loader.Loader;
 import loader.MasterRenderer;
+import loader.SceneFbo;
 import models.RawModel;
 import models.TexturedModel;
 import objConverter.OBJFileLoader;
@@ -24,6 +26,9 @@ public class MainEngine {
 
     static final float TILE_SIZE = 200f; // or 300
     static final int GRID_SIZE = 3;
+
+    // SceneFbo sceneFbo;
+    // BloomRenderer bloomRenderer;
 
     public static void main(String[] args) {
         try {
@@ -64,7 +69,7 @@ public class MainEngine {
                     new ModelTexture(loader.loadTexture("13913_Sun_diff", FileType.JPG)).setHasTransparency(false)
                             .setShineDamper(100)
                             .setReflectivity(1));
-            Entity sunEntity = new Entity(sunTexture, new Vector3f(-200, 100, -200), 6,
+            Entity sunEntity = new Entity(sunTexture, new Vector3f(-200, 30, 400), 9,
                     0, 0, 0);
 
             Player player = new Player(
@@ -90,13 +95,22 @@ public class MainEngine {
                 }
             }
 
-            Light light = new Light(new Vector3f(-200, 1000000000, -200), new Vector3f(1, 1, 1),
+            Light light = new Light(new Vector3f(-200, 300, -200), new Vector3f(1, 1, 1),
                     new Vector3f(1.0f, 0.0001f, 0.00001f));
 
             MasterRenderer masterrender = new MasterRenderer();
+            // SceneFbo sceneFbo = new SceneFbo(
+            //         Display.getWidth(),
+            //         Display.getHeight());
+            // BloomRenderer bloomRenderer = new BloomRenderer(loader);
 
             while (!Display.isCloseRequested()) {
+
+                GL11.glEnable(GL11.GL_DEPTH_TEST);
+                GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
+
                 // GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_LINE);
+
                 float delta = DisplayManager.getFrameTimeSeconds();
 
                 Vector3f oldPos = new Vector3f(player.getPosition());
@@ -128,7 +142,8 @@ public class MainEngine {
                 masterrender.processEntity(player);
 
                 masterrender.render(light, camera);
-                masterrender.renderSun(sunEntity, camera);
+                masterrender.renderSun(sunEntity, camera,light);
+           
                 DisplayManager.updateDisplay();
                 // DisplayManager.updateDisplay();
             }

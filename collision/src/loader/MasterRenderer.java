@@ -51,7 +51,7 @@ public class MasterRenderer {
     public void prepare() {
         GL11.glEnable(GL11.GL_DEPTH_TEST);
         GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
-        GL11.glClearColor(RED, GREEN, BLUE, 1);
+        GL11.glClearColor(0,0,0, 1);
     }
 
     public static void enableCulling() {
@@ -63,35 +63,51 @@ public class MasterRenderer {
         GL11.glDisable(GL11.GL_CULL_FACE);
     }
 
-public void renderSun(Entity sun, Camera camera){
-
-    GL11.glDisable(GL11.GL_DEPTH_TEST); // 🔥 ADD THIS
-    disableCulling();                  // 🔥 ADD THIS
+public void renderSun(Entity sun, Camera camera, Light light) {
+    GL11.glEnable(GL11.GL_BLEND);
+    GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE); // Additive blending
+    GL11.glDisable(GL11.GL_DEPTH_TEST);
+    GL11.glDepthMask(false); // Optimization: Don't write to depth buffer for glow
 
     sunShader.start();
-
-    GL11.glEnable(GL11.GL_BLEND);
-    GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
-
+    sunShader.loadLight(light);
     sunShader.loadViewMatrix(camera);
-    sunShader.loadGlowColour(new Vector3f(1.0f, 0.9f, 0.6f));
+    sunShader.loadCameraPosition(camera);
 
+    float originalScale = sun.getScale();
+
+    // Pass 1: The Blinding Core (Almost pure white)
+    sunShader.loadGlowColour(new Vector3f(1.5f, 1.5f, 1.2f)); 
     sunRenderer.render(sun);
 
-    GL11.glDisable(GL11.GL_BLEND);
+    // Pass 2: Intense Inner Halo (Bright Yellow)
+    sun.setScale(originalScale * 1.2f);
+    sunShader.loadGlowColour(new Vector3f(1.0f, 0.8f, 0.3f));
+    sunRenderer.render(sun);
+
+    // Pass 3: The Wide Glow (Soft Orange)
+    sun.setScale(originalScale * 1.6f);
+    sunShader.loadGlowColour(new Vector3f(0.6f, 0.3f, 0.1f));
+    sunRenderer.render(sun);
+
+    // Pass 4: The Atmospheric Aura (Very large, very faint red/orange)
+    sun.setScale(originalScale * 1.8f);
+    sunShader.loadGlowColour(new Vector3f(0.15f, 0.05f, 0.01f));
+    sunRenderer.render(sun);
+
+    sun.setScale(originalScale); // Reset
     sunShader.stop();
-
-    enableCulling();                   // restore
-    GL11.glEnable(GL11.GL_DEPTH_TEST);  // restore
+    
+    GL11.glDepthMask(true);
+    GL11.glDisable(GL11.GL_BLEND);
+    GL11.glEnable(GL11.GL_DEPTH_TEST);
 }
-
-
 
     public void render(Light sun, Camera camera) {
         prepare();
         shader.start();
         shader.loadSkyColour(RED, GREEN, BLUE);
-        // shader.loadLight(sun);
+        shader.loadLight(sun);
         shader.loadViewMatrix(camera);
         entityRenderer.render(entities);
         shader.stop();

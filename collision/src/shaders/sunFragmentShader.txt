@@ -1,6 +1,8 @@
 #version 400 core
 
 in vec2 pass_textureCoordinates;
+in vec3 surfaceNormal;
+in vec3 toCameraVector;
 
 uniform sampler2D modelTexture;
 uniform vec3 glowColour;
@@ -8,11 +10,21 @@ uniform vec3 glowColour;
 out vec4 out_Color;
 
 void main(void) {
-
     vec4 textureColour = texture(modelTexture, pass_textureCoordinates);
-
-    // Emissive glow
+    
+    vec3 unitNormal = normalize(surfaceNormal);
+    vec3 unitVectorToCamera = normalize(toCameraVector);
+    
+    // Calculate how much the surface faces the camera
+    // 1.0 = center of sphere, 0.0 = edge of sphere
+    float brightness = dot(unitNormal, unitVectorToCamera);
+    brightness = max(brightness, 0.0);
+    
+    // Create a "rim" effect: brighter at the center, transparent at edges
+    float alpha = pow(brightness, 2.0); // Adjust power to make glow softer/sharper
+    
     vec3 finalColour = textureColour.rgb * glowColour;
-
-    out_Color = vec4(finalColour, 1.0);
+    
+    // Use alpha to fade the edges
+    out_Color = vec4(finalColour, alpha);
 }

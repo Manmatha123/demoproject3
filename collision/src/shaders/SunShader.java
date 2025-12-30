@@ -19,17 +19,17 @@ public class SunShader extends ShaderProgram {
     private int location_attenuation;
     private int location_lightColour;
     private int location_lightPosition;
-
+private int location_cameraPosition;
 
     public SunShader() {
         super(VERTEX_FILE, FRAGMENT_FILE);
     }
 
-    @Override
-    public void bindAttributes() {
+ @Override
+    protected void bindAttributes() {
         super.bindAttribute(0, "position");
         super.bindAttribute(1, "textureCoordinates");
-        
+        super.bindAttribute(2, "normal"); // Vital for glow!
     }
 
     @Override
@@ -41,12 +41,15 @@ public class SunShader extends ShaderProgram {
         location_attenuation = super.getUniformlocation("attenuation");
         location_lightPosition = super.getUniformlocation("lightPosition");
         location_lightColour = super.getUniformlocation("lightColour");
+        location_cameraPosition = super.getUniformlocation("cameraPosition"); // Add this
     }
 
     public void loadTransformation(Matrix4f matrix){
         super.loadMatrix(location_transformationMatrix, matrix);
     }
-
+public void loadCameraPosition(Camera camera) {
+        super.loadVector(location_cameraPosition, camera.getPosition());
+    }
     public void loadProjection(Matrix4f matrix){
         super.loadMatrix(location_projectionMatrix, matrix);
     }

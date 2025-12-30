@@ -4,6 +4,7 @@ import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
 import entities.Camera;
+import entities.Entity;
 import entities.Light;
 import toolBox.Maths;
 
@@ -63,9 +64,9 @@ public class StaticShader extends ShaderProgram {
         super.loadMatrix(location_transformMatrix,matrix);
     }
 
-    public void loadLight(Light light){
-        super.loadVector(location_lightPosition,light.getPosition());
-        super.loadVector(location_lightColour, light.getColour());
+    public void loadLight(Light sun){
+        super.loadVector(location_lightPosition,sun.getPosition());
+        super.loadVector(location_lightColour, sun.getColour());
     }
 
 
