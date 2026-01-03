@@ -1,0 +1,66 @@
+#version 150
+
+in vec2 pass_textureCoordinates;
+in vec3 surfaceNormal;
+in vec3 toLightVector;
+in vec3 tocameravector;
+in float visibility;
+in vec4 shadowCoords;
+
+out vec4 out_colour;
+
+
+uniform sampler2D shadowMap;
+uniform sampler2D modelTexture;
+uniform vec3 lightcolour;
+uniform float shinedamper;
+uniform float reflectivity;
+uniform vec3 skycolour;
+
+const float levels = 3.0;
+
+
+void main(void){
+
+vec3 projectCoords=shadowCoords.xyz / shadowCoords.w;
+projectCoords= projectCoords * 0.5 + 0.5;
+
+
+    vec3 unitNormal = normalize(surfaceNormal);
+    vec3 unitLightVector = normalize(toLightVector);
+
+    float nDot1 = dot(unitNormal, unitLightVector);
+    float brightness = max(nDot1,  0.4f);
+    vec3 diffuse = brightness * lightcolour;
+    vec3 unitvectortocamera = normalize(tocameravector);
+    vec3 lightdirection = - unitLightVector;
+    vec3 reflectedLD = reflect(lightdirection,unitNormal);
+
+
+
+
+
+    float sf = dot(reflectedLD, unitvectortocamera);
+    sf = max(sf, 0.0);
+    float df = pow(sf, shinedamper);
+    vec3 fs = df * lightcolour * reflectivity;
+    vec4 texturecolour = texture(modelTexture,pass_textureCoordinates);
+if(projectCoords.x < 0.0 || projectCoords.x>1.0 || projectCoords.y < 0.0 || projectCoords.y>1.0 || projectCoords.z > 1.0 ){
+out_colour=vec4(diffuse,1.0) * texturecolour + vec4(fs,1.0);
+return;
+}
+
+float bias= max(0.01 * (1.0 -  dot(unitNormal, unitLightVector)), 0.003);
+float closeDepth=texture(shadowMap, projectCoords.xy).r;
+float currdepth=projectCoords.z;
+
+    float lightFactor = 1.0;
+    if( currdepth > closeDepth + bias){
+        lightFactor =0.1;
+    }
+diffuse*=lightFactor;
+	out_colour = vec4(diffuse,1.0) * texturecolour + vec4(fs,1.0);
+
+
+}
+

@@ -1,0 +1,14 @@
+#version 400 core
+
+in vec2 pass_textureCoordinates;
+
+uniform sampler2D modelTexture;
+uniform vec3 glowColour;
+
+out vec4 out_Color;
+
+void main(void) {
+    vec4 textureColour = texture(modelTexture, pass_textureCoordinates);
+    vec3 finalColour = textureColour.rgb * glowColour;
+    out_Color = vec4(finalColour, 1.0);
+}

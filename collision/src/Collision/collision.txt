@@ -1,0 +1,97 @@
+// to entity
+
+
+public AABB getWorldAABB() {
+    AABB local = textureModel.getRawModel().aabb;
+
+    Vector3f min = new Vector3f(
+        local.min.x * scale.x + position.x,
+        local.min.y * scale.y + position.y,
+        local.min.z * scale.z + position.z
+    );
+
+    Vector3f max = new Vector3f(
+        local.max.x * scale.x + position.x,
+        local.max.y * scale.y + position.y,
+        local.max.z * scale.z + position.z
+    );
+
+    return new AABB(min, max);
+}
+
+
+
+// game loop
+
+public static List<Entity> collidableEntities = new ArrayList<>();
+Entity tempTreeEntity = new Entity(...);
+treesArr.add(tempTreeEntity);
+collidableEntities.add(tempTreeEntity);
+
+
+
+
+/// controller obj test
+
+private boolean willCollide(Vector3f nextPos) {
+
+    // Create a temporary world AABB for the ball at next position
+    Vector3f oldPos = new Vector3f(position);
+
+    position.set(nextPos);
+    AABB nextAABB = getWorldAABB();
+    position.set(oldPos);
+
+    for (Entity e : GameLoop.collidableEntities) {
+        if (nextAABB.intersects(e.getWorldAABB())) {
+            return true;
+        }
+    }
+    return false;
+}
+
+
+
+private void attemptMove(float dx, float dy, float dz) {
+
+    Vector3f nextPos = new Vector3f(
+        position.x + dx,
+        position.y + dy,
+        position.z + dz
+    );
+
+    if (willCollide(nextPos)) {
+        return; // block movement
+    }
+
+    increasePosition(dx, dy, dz);
+}
+
+
+
+// 
+if (Keyboard.isKeyDown(Keyboard.KEY_UP)) {
+    float dx = (float) (distance * Math.sin(Math.toRadians(getRotY())));
+    float dz = (float) (distance * Math.cos(Math.toRadians(getRotY())));
+    attemptMove(dx, 0, dz);
+}
+
+if (Keyboard.isKeyDown(Keyboard.KEY_DOWN)) {
+    float dx = (float) (distance * Math.sin(Math.toRadians(getRotY())));
+    float dz = (float) (distance * Math.cos(Math.toRadians(getRotY())));
+    attemptMove(-dx, 0, -dz);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
