@@ -51,7 +51,6 @@ public class masterrenderer {
 
 
     private Map<TextureModel, List<Entity>> entities = new HashMap<TextureModel, List<Entity>>();
-    private Map<TextureModel, List<Entity>> normalMapEntities = new HashMap<TextureModel, List<Entity>>();
 
     public Map<TextureModel, List<Entity>> getEntities() {
         return entities;

@@ -26,8 +26,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.swing.*;
-
-
 import static org.lwjgl.opengl.GL11.*;
 import static org.newdawn.slick.opengl.renderer.SGL.GL_DEPTH_BUFFER_BIT;
 
@@ -72,10 +70,10 @@ public void startRendering(){
                    loader = new Loader();
 
 
-                   List<RawModel> treeModels = objLoader.loadObjModel("C:\\project\\3D Field\\resource\\lowPolyTree.obj",loader);
-                   List<RawModel> terrienModel = objLoader.loadObjModel("C:\\project\\3D Field\\resource\\3dplane.obj",loader);
-                   List<RawModel> ballModel = objLoader.loadObjModel("C:\\project\\3D Field\\resource\\ball.obj",loader);
-                   List<RawModel> sunModels = objLoader.loadObjModel("C:\\project\\3D Field\\resource\\ball.obj",loader);
+                   List<RawModel> treeModels = objLoader.loadObjModel("E:\\lwjgl\\3DFieldShadow\\3DField\\resource\\lowPolyTree.obj",loader);
+                   List<RawModel> terrienModel = objLoader.loadObjModel("E:\\lwjgl\\3DFieldShadow\\3DField\\resource\\3dplane.obj",loader);
+                   List<RawModel> ballModel = objLoader.loadObjModel("E:\\lwjgl\\3DFieldShadow\\3DField\\resource\\ball.obj",loader);
+                   List<RawModel> sunModels = objLoader.loadObjModel("E:\\lwjgl\\3DFieldShadow\\3DField\\resource\\ball.obj",loader);
 
                    TextureModel ballTexture = new TextureModel(ballModel.get(0), new ModelTexture(loader.loadTexture("ball")),"ball");
                    ControlObject_Test p = new ControlObject_Test(ballTexture, new Vector3f(0,105.0f, 0.0f), new Vector3f(0,0,0), 0, 0, 0, new Vector3f(2f, 2f, 2f));
@@ -92,7 +90,7 @@ public void startRendering(){
                    TextureModel terrianTexture=new TextureModel(terrienModel.get(0), new ModelTexture(loader.loadTexture("grassFlowers")), "grassFlowers");
 
                   masterrenderer renderer = new masterrenderer(loader, camera);
-                   light light = new light(new Vector3f(0,900, 100.0f),new Vector3f(-0.3f,-0.4f,-0.1f), new Vector3f(1.0f, 0.99f, 0.88f),1.2f, 65, 1f, 0.01f, 0.00001f);
+                   light light = new light(new Vector3f(0,900, 100.0f),new Vector3f(-0.1f,-0.9f,-1.0f), new Vector3f(1.0f, 0.99f, 0.88f),1.2f, 65, 1f, 0.01f, 0.00001f);
 
 //                   List<GuiTexture> guiTextures = new ArrayList<>();
 //                   guiTextures.add(new GuiTexture(renderer.getShadowMapTexture(), new Vector2f(0,-245.0f), new Vector2f(5f, 5f)));
@@ -161,7 +159,7 @@ public void startRendering(){
                         }
 
                         renderer.renderShadowMap(renderingEntity, light);
-                        GL11.glEnable(GL30.GL_CLIP_DISTANCE0);
+                     
 
 
 

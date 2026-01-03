@@ -20,7 +20,7 @@ public class StaticShader extends  ShaderProgram{
     private int location_transformationMatrix;
     private int location_projectionMatrix;
     private int location_viewMatrix;
-    private int location_lightposition;
+    private int location_lightDirection;
     private int location_lightcolour;
 
     private int location_shinedamper;
@@ -61,7 +61,7 @@ public class StaticShader extends  ShaderProgram{
         location_skycolour = super.getUniformLocation("skycolour");
         location_offset = super.getUniformLocation("offset");
 
-        location_lightposition = super.getUniformLocation("lightposition");
+        location_lightDirection = super.getUniformLocation("lightDirection");
 
         location_modelMatrix = super.getUniformLocation("modelMatrix");
         location_depthBiasMatrix = super.getUniformLocation("depthBiasMatrix");
@@ -116,8 +116,7 @@ public class StaticShader extends  ShaderProgram{
     public void loadClipPlane(Vector4f plane){
         super.loadVector(location_plane, plane);
     }
-
-
+    
     public void loadLightRange(float range){
         super.loadFloat(location_lightRange,range);
     }
@@ -135,22 +134,14 @@ public class StaticShader extends  ShaderProgram{
         super.loadFloat(location_ambient,ambient);
     }
 
-
-
-
-
     public void loadlight(light l){
-        super.loadVector(location_lightposition, l.getPosition());
+        super.loadVector(location_lightDirection, l.getDirection());
         super.loadVector(location_lightcolour, l.getColour());
         super.loadFloat(location_attenConstant,l.getAttenuation());
         super.loadFloat(location_ambient, l.getAmbient());
         super.loadFloat(location_lightRange, l.getRange());
         super.loadFloat(location_attenLinear, l.getAttenLinear());
         super.loadFloat(location_attenExponent, l.getAttenExponent());
-    }
-
-    public void loadShadowmap(int val){
-
     }
 
     public void loadViewMatrix(Camera camera){
