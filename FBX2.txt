@@ -1,0 +1,137 @@
+To implement a high-performance FBX loader for an existing LWJGL 2.9.3 project, you must separate loading (parsing the file once) from rendering (drawing from GPU memory).
+This solution uses jMonkeyEngine 3.2 libraries as a standalone parser to feed your LWJGL 2.9.3 pipeline.
+1. The Model Data Class
+This object stores the GPU handles. You create this once per model.
+java
+import org.lwjgl.opengl.GL15;
+
+public class FBXModel {
+    private final int vboId;
+    private final int vertexCount;
+
+    public FBXModel(int vboId, int vertexCount) {
+        this.vboId = vboId;
+        this.vertexCount = vertexCount;
+    }
+
+    public int getVboId() { return vboId; }
+    public int getVertexCount() { return vertexCount; }
+
+    public void cleanup() {
+        GL15.glDeleteBuffers(vboId);
+    }
+}
+Use code with caution.
+
+2. The FBX Loader Class (Run ONCE)
+This class uses jME's parser to load the file, extract the vertex data, and upload it to a Vertex Buffer Object (VBO).
+java
+import com.jme3.asset.DesktopAssetManager;
+import com.jme3.scene.Spatial;
+import com.jme3.scene.Geometry;
+import com.jme3.scene.Mesh;
+import com.jme3.scene.VertexBuffer.Type;
+import com.jme3.scene.plugins.fbx.FbxLoader;
+import java.nio.FloatBuffer;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL15;
+
+public class FBXLoader {
+    private final DesktopAssetManager assetManager;
+
+    public FBXLoader() {
+        assetManager = new DesktopAssetManager();
+        // Register FBX support
+        assetManager.registerLoader(FbxLoader.class, "fbx");
+    }
+
+    public FBXModel loadFBX(String path) {
+        // Load file into CPU memory
+        Spatial model = assetManager.loadModel(path);
+        
+        // Find the mesh inside the FBX hierarchy
+        final Mesh[] meshContainer = new Mesh[1];
+        model.depthFirstTraversal(s -> {
+            if (s instanceof Geometry) {
+                meshContainer[0] = ((Geometry) s).getMesh();
+            }
+        });
+
+        Mesh mesh = meshContainer[0];
+        if (mesh == null) throw new RuntimeException("No mesh found in FBX: " + path);
+
+        // Get the vertex buffer
+        FloatBuffer vertices = mesh.getFloatBuffer(Type.Position);
+        int vertexCount = mesh.getVertexCount();
+
+        // Generate VBO and upload to GPU memory
+        int vboId = GL15.glGenBuffers();
+        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboId);
+        GL15.glBufferData(GL15.GL_ARRAY_BUFFER, vertices, GL15.GL_STATIC_DRAW);
+        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+
+        return new FBXModel(vboId, vertexCount);
+    }
+}
+Use code with caution.
+
+3. The Main Integration (Existing Project)
+Integrate the loader into your existing loop. This ensures you only read the file during setup.
+java
+import org.lwjgl.opengl.Display;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL15;
+
+public class GameMain {
+    private FBXModel playerModel;
+
+    public void init() {
+        // 1. Existing Display Setup
+        // Display.create()...
+        
+        // 2. Load FBX ONLY ONCE
+        FBXLoader loader = new FBXLoader();
+        playerModel = loader.loadFBX("assets/models/character.fbx");
+    }
+
+    public void loop() {
+        while (!Display.isCloseRequested()) {
+            GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
+            
+            render();
+
+            Display.update();
+            Display.sync(60);
+        }
+    }
+
+    private void render() {
+        // 3. Render from GPU (Very Fast)
+        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, playerModel.getVboId());
+        GL11.glEnableClientState(GL11.GL_VERTEX_ARRAY);
+        
+        // Pointer points to the currently bound VBO (0 offset)
+        GL11.glVertexPointer(3, GL11.GL_FLOAT, 0, 0);
+        
+        GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, playerModel.getVertexCount());
+
+        GL11.glDisableClientState(GL11.GL_VERTEX_ARRAY);
+        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+    }
+
+    public static void main(String[] args) {
+        GameMain game = new GameMain();
+        game.init();
+        game.loop();
+    }
+}
+Use code with caution.
+
+Setup Requirements for 2026:
+Libraries: Download the jMonkeyEngine 3.2 JARs. You only need jme3-core.jar and jme3-plugins.jar.
+FBX Export: Ensure your model is exported as FBX 7.4 Binary (triangulated).
+Coordinate System: If the model is lying on its back, add GL11.glRotatef(-90, 1, 0, 0) before your draw call, as FBX is often Z-up while LWJGL/OpenGL is Y-up.
+Cleaning Up: When closing the game, call playerModel.cleanup() to free the GPU memory.
+
+
+

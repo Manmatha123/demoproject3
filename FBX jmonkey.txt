@@ -1,0 +1,130 @@
+To load and render an animated FBX using jMonkeyEngine 3.2 (the version compatible with LWJGL 2.9.3), you need three components: a loader to extract data, an animation controller to play clips, and the integration in the main application.
+1. The Model Loader Class
+This class traverses the FBX hierarchy to ensure you can access the underlying mesh buffers (vertices, normals, UVs) for manual rendering if needed, while also setting up the skeletal animation.
+java
+import com.jme3.asset.AssetManager;
+import com.jme3.scene.Spatial;
+import com.jme3.scene.Geometry;
+import com.jme3.scene.Mesh;
+import com.jme3.scene.VertexBuffer.Type;
+import com.jme3.scene.SceneGraphVisitor;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
+
+public class FBXModelLoader {
+    private final AssetManager assetManager;
+
+    public FBXModelLoader(AssetManager assetManager) {
+        this.assetManager = assetManager;
+    }
+
+    public Spatial loadAnimatedModel(String path) {
+        // Loads the FBX; jME 3.2 handles the skeletal hierarchy automatically
+        Spatial model = assetManager.loadModel(path);
+        
+        // Traverse to find mesh data (Vertices, Normals, UVs)
+        model.depthFirstTraversal(new SceneGraphVisitor() {
+            @Override
+            public void visit(Spatial spatial) {
+                if (spatial instanceof Geometry) {
+                    Mesh mesh = ((Geometry) spatial).getMesh();
+                    
+                    // These buffers contain the raw data for LWJGL rendering
+                    FloatBuffer pos = mesh.getFloatBuffer(Type.Position);
+                    FloatBuffer norm = mesh.getFloatBuffer(Type.Normal);
+                    FloatBuffer uv = mesh.getFloatBuffer(Type.TexCoord);
+                    IntBuffer indices = (IntBuffer) mesh.getBuffer(Type.Index).getData();
+                    
+                    if (pos != null) {
+                        System.out.println("Loaded mesh: " + spatial.getName() + " with " + mesh.getVertexCount() + " vertices.");
+                    }
+                }
+            }
+        });
+        return model;
+    }
+}
+Use code with caution.
+
+2. The Animation Controller
+In jME 3.2, you use AnimControl to manage clips and AnimChannel to play them. This is the "brain" for your skeletal movements.
+java
+import com.jme3.animation.AnimChannel;
+import com.jme3.animation.AnimControl;
+import com.jme3.animation.LoopMode;
+import com.jme3.scene.Spatial;
+
+public class AnimationHandler {
+    private AnimControl control;
+    private AnimChannel channel;
+
+    public void setupAnimation(Spatial model, String initialAnim) {
+        control = model.getControl(AnimControl.class);
+        if (control != null) {
+            channel = control.createChannel();
+            if (control.getAnimationNames().contains(initialAnim)) {
+                channel.setAnim(initialAnim);
+                channel.setLoopMode(LoopMode.Loop);
+                channel.setSpeed(1.0f);
+            }
+        } else {
+            System.err.println("No AnimControl found on this FBX!");
+        }
+    }
+}
+Use code with caution.
+
+3. Final Application Integration
+This is your "Main" class where everything comes together using the LWJGL 2.9.3 backend.
+java
+import com.jme3.app.SimpleApplication;
+import com.jme3.light.DirectionalLight;
+import com.jme3.math.ColorRGBA;
+import com.jme3.math.Vector3f;
+import com.jme3.scene.Spatial;
+
+public class MainApp extends SimpleApplication {
+
+    public static void main(String[] args) {
+        MainApp app = new MainApp();
+        app.start(); // This initializes the LWJGL 2.9.3 context
+    }
+
+    @Override
+    public void simpleInitApp() {
+        // 1. Initialize Loader
+        FBXModelLoader loader = new FBXModelLoader(assetManager);
+        
+        // 2. Load Model (ensure file is in assets/Models/character.fbx)
+        Spatial character = loader.loadAnimatedModel("Models/character.fbx");
+        character.setLocalScale(0.01f); // Common FBX scale fix
+        rootNode.attachChild(character);
+
+        // 3. Start Animation (Replace "Walk" with your clip name)
+        AnimationHandler animHandler = new AnimationHandler();
+        animHandler.setupAnimation(character, "Walk");
+
+        // 4. Add Light (Essential to see textures/normals)
+        DirectionalLight sun = new DirectionalLight();
+        sun.setDirection(new Vector3f(-0.5f, -0.5f, -0.5f).normalizeLocal());
+        sun.setColor(ColorRGBA.White);
+        rootNode.addLight(sun);
+        
+        viewPort.setBackgroundColor(ColorRGBA.DarkGray);
+    }
+}
+Use code with caution.
+
+Critical Checklist for 2026:
+FBX Format: The loader in jME 3.2 requires FBX 7.4 Binary or 6.1 ASCII. Newer "FBX 2020+" formats from modern Blender versions will often fail to load vertices.
+Buffer Extraction: If you are bypassing jME's renderer and doing manual GL11 calls, use the depthFirstTraversal code in Step 1 to pull the FloatBuffer data directly into your LWJGL vertex pointers.
+Dependencies: Ensure your pom.xml or build path includes jme3-lwjgl (for the 2.9.3 bridge) and jme3-plugins (which contains the FbxLoader class).
+
+
+
+
+undefined
+undefined
+2 sites
+FbxLoader.java - GitHub
+Spatial scene = constructSceneGraph(); // Load animations into AnimControls constructAnimations(); return scene; } finally { relea...
