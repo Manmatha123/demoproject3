@@ -1,0 +1,51 @@
+LWJGL 2 (worked automatically)	LWJGL 3
+glLight()	❌ REMOVED
+glMaterial()	❌ REMOVED
+glColorMaterial()	❌ REMOVED
+glTexEnv()	❌ REMOVED
+glMatrixMode()	❌ REMOVED
+Default lighting	❌ NONE
+Default texture unit	❌ NONE
+
+
+
+use this 
+
+glActiveTexture(GL_TEXTURE0);
+glBindTexture(GL_TEXTURE_2D, textureID);
+
+
+
+glEnable(GL_DEPTH_TEST);
+glDepthFunc(GL_LESS);
+glEnable(GL_CULL_FACE);
+glCullFace(GL_BACK);
+glClearColor(0.5f, 0.7f, 1.0f, 1.0f);
+
+
+
+
+
+
+6️⃣ Texture color space issue (sRGB)
+LWJGL 2 ignored this.
+Fix:
+glEnable(GL_FRAMEBUFFER_SRGB);
+
+Or load texture as:
+GL_SRGB8_ALPHA8
+
+
+
+9️⃣ FINAL DIAGNOSIS FOR YOUR PROJECT
+
+Based on your description:
+✔ Ported VAO/VBO correctly
+✔ Shader runs
+❌ Texture unit not bound
+❌ Lighting not implemented fully
+❌ Missing ambient
+❌ Normals or normal matrix wrong
+
+This is exactly what you’re seeing.
+
