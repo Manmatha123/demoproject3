@@ -1,0 +1,49 @@
+//************8create line***************
+
+//this initialize once
+
+int vao = glGenVertexArrays();
+glBindVertexArray(vao);
+
+int vbo = glGenBuffers();
+glBindBuffer(GL_ARRAY_BUFFER, vbo);
+glBufferData(GL_ARRAY_BUFFER,
+    new float[]{0,0,0, 1,1,0},
+    GL_STATIC_DRAW);
+
+glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
+glEnableVertexAttribArray(0);
+
+
+// this should called in each render
+glBindVertexArray(vao);
+glDrawArrays(GL_LINES, 0, 2);
+
+//************create dotted line************
+
+
+public static void drawDottedLine(
+        Vector3f start,
+        Vector3f end,
+        Vector3f color,
+        float segmentLength,
+        float gapLength) {
+
+    Vector3f dir = new Vector3f(end).sub(start);
+    float length = dir.length();
+    dir.normalize();
+
+    float step = segmentLength + gapLength;
+
+    for (float d = 0; d < length; d += step) {
+        Vector3f a = new Vector3f(dir).mul(d).add(start);
+        Vector3f b = new Vector3f(dir)
+                .mul(Math.min(d + segmentLength, length))
+                .add(start);
+
+        Debug.drawLine(a, b, color);
+    }
+}
+
+
+

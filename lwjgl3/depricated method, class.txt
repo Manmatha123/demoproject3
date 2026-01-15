@@ -1,0 +1,79 @@
+1️⃣ Utility package (COMPLETELY REMOVED)
+org.lwjgl.util.*
+
+Removed math
+org.lwjgl.util.vector.Vector2f
+org.lwjgl.util.vector.Vector3f
+org.lwjgl.util.vector.Vector4f
+org.lwjgl.util.vector.Matrix4f
+
+Removed GLU
+org.lwjgl.util.glu.GLU
+org.lwjgl.util.glu.Sphere
+org.lwjgl.util.glu.Disk
+org.lwjgl.util.glu.Cylinder
+
+2️⃣ Texture utilities (REMOVED)
+org.lwjgl.util.texture.Texture
+org.lwjgl.util.texture.TextureLoader
+
+
+Also incompatible:
+
+org.newdawn.slick.opengl.Texture
+org.newdawn.slick.opengl.TextureLoader
+
+3️⃣ Window & display system (REMOVED)
+org.lwjgl.opengl.Display
+org.lwjgl.opengl.DisplayMode
+Display.create()
+Display.update()
+Display.sync()
+Display.destroy()
+
+4️⃣ Input system (REMOVED)
+org.lwjgl.input.Keyboard
+org.lwjgl.input.Mouse
+org.lwjgl.input.Controllers
+
+5️⃣ OpenAL helpers (REMOVED)
+org.lwjgl.util.WaveData
+AL.create()
+AL.destroy()
+
+6️⃣ Model loading utilities (REMOVED)
+org.lwjgl.util.obj.OBJLoader
+org.lwjgl.util.obj.Model
+
+7️⃣ Font / text utilities (REMOVED)
+org.lwjgl.util.glyph.GlyphPage
+org.lwjgl.util.glyph.GlyphPageManager
+
+8️⃣ Applet & Web Start (REMOVED)
+org.lwjgl.LWJGLApplet
+
+9️⃣ Old timing utilities (REMOVED)
+org.lwjgl.Sys.getTime()
+org.lwjgl.Sys.getTimerResolution()
+
+🔟 Deprecated OpenGL fixed-function helpers (NOT PROVIDED)
+glMatrixMode()
+glLoadIdentity()
+glBegin()
+glEnd()
+glTranslatef()
+glRotatef()
+glLight()
+glMaterial()
+
+
+Core profile will crash if used.
+
+✅ What you MUST use instead
+Removed	Replacement
+org.lwjgl.util.vector.*	JOML
+TextureLoader	STBImage
+Display	GLFW
+Keyboard/Mouse	GLFW callbacks
+WaveData	STBVorbis / custom WAV loader
+Sys.getTime()	GLFW.glfwGetTime()
