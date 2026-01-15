@@ -1,0 +1,85 @@
+import static org.lwjgl.opengl.GL20.*;
+import static org.lwjgl.opengl.GL30.*;
+
+import java.nio.FloatBuffer;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
+import org.lwjgl.system.MemoryStack;
+
+public class ShaderProgram {
+
+    private final int programID;
+    private final int vertexID;
+    private final int fragmentID;
+
+    public ShaderProgram(String vertexSource, String fragmentSource) {
+
+        vertexID = loadShader(vertexSource, GL_VERTEX_SHADER);
+        fragmentID = loadShader(fragmentSource, GL_FRAGMENT_SHADER);
+
+        programID = glCreateProgram();
+        glAttachShader(programID, vertexID);
+        glAttachShader(programID, fragmentID);
+
+        glLinkProgram(programID);
+        if (glGetProgrami(programID, GL_LINK_STATUS) == GL_FALSE) {
+            throw new RuntimeException("Program linking failed:\n"
+                    + glGetProgramInfoLog(programID));
+        }
+
+        glValidateProgram(programID);
+    }
+
+    // ========== IMPORTANT ==========
+    public void start() {
+        glUseProgram(programID);
+    }
+
+    public void stop() {
+        glUseProgram(0);
+    }
+
+    // ===============================
+
+    public void cleanUp() {
+        stop();
+        glDetachShader(programID, vertexID);
+        glDetachShader(programID, fragmentID);
+        glDeleteShader(vertexID);
+        glDeleteShader(fragmentID);
+        glDeleteProgram(programID);
+    }
+
+    // ---------- UNIFORMS ----------
+    public void loadMatrix(String name, Matrix4f matrix) {
+        int location = glGetUniformLocation(programID, name);
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            FloatBuffer buffer = stack.mallocFloat(16);
+            matrix.get(buffer);
+            glUniformMatrix4fv(location, false, buffer);
+        }
+    }
+
+    public void loadVector(String name, Vector3f vec) {
+        int location = glGetUniformLocation(programID, name);
+        glUniform3f(location, vec.x, vec.y, vec.z);
+    }
+
+    public void loadFloat(String name, float value) {
+        int location = glGetUniformLocation(programID, name);
+        glUniform1f(location, value);
+    }
+
+    // ---------- SHADER LOADING ----------
+    private static int loadShader(String source, int type) {
+        int id = glCreateShader(type);
+        glShaderSource(id, source);
+        glCompileShader(id);
+
+        if (glGetShaderi(id, GL_COMPILE_STATUS) == GL_FALSE) {
+            throw new RuntimeException("Shader compile error:\n"
+                    + glGetShaderInfoLog(id));
+        }
+        return id;
+    }
+}

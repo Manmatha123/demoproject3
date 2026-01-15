@@ -1,0 +1,137 @@
+1️⃣ SOLID LINE (minimal & correct)
+🔹 Vertex Shader (line.vert)
+#version 330 core
+
+layout (location = 0) in vec3 position;
+uniform mat4 mvp;
+
+void main() {
+    gl_Position = mvp * vec4(position, 1.0);
+}
+
+🔹 Fragment Shader (line.frag)
+#version 330 core
+
+out vec4 fragColor;
+uniform vec3 color;
+
+void main() {
+    fragColor = vec4(color, 1.0);
+}
+
+🔹 Java code (draw line)
+float[] vertices = {
+    x1, y1, z1,
+    x2, y2, z2
+};
+
+int vao = glGenVertexArrays();
+int vbo = glGenBuffers();
+
+glBindVertexArray(vao);
+glBindBuffer(GL_ARRAY_BUFFER, vbo);
+glBufferData(GL_ARRAY_BUFFER, vertices, GL_DYNAMIC_DRAW);
+
+glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
+glEnableVertexAttribArray(0);
+
+// draw
+shader.start();
+shader.loadMatrix("mvp", mvp);
+shader.loadVector("color", new Vector3f(1, 0, 0));
+
+glBindVertexArray(vao);
+glDrawArrays(GL_LINES, 0, 2);
+
+
+✔ This draws a solid line
+
+
+
+
+
+
+
+
+//*********Dotted line*********
+
+
+Vertex Shader (dotted.vert)
+#version 330 core
+
+layout (location = 0) in vec3 position;
+uniform mat4 mvp;
+
+out float vDistance;
+
+void main() {
+    vDistance = gl_VertexID == 0 ? 0.0 : length(position);
+    gl_Position = mvp * vec4(position, 1.0);
+}
+
+🔹 Fragment Shader (dotted.frag)
+#version 330 core
+
+in float vDistance;
+out vec4 fragColor;
+
+uniform vec3 color;
+uniform float dashSize;
+uniform float gapSize;
+
+void main() {
+    float pattern = mod(vDistance, dashSize + gapSize);
+    if (pattern > dashSize)
+        discard;
+
+    fragColor = vec4(color, 1.0);
+}
+
+🔹 Java (draw dotted line)
+shader.start();
+shader.loadMatrix("mvp", mvp);
+shader.loadVector("color", new Vector3f(0, 1, 0));
+shader.loadFloat("dashSize", 5.0f);
+shader.loadFloat("gapSize", 5.0f);
+
+glBindVertexArray(vao);
+glDrawArrays(GL_LINES, 0, 2);
+
+
+✔ This produces:
+
+---- ---- ---- ----
+
+⚠️ IMPORTANT OpenGL LIMITS (don’t fight them)
+Line width
+glLineWidth(2.0f);
+
+
+Width > 1.0 → NOT guaranteed
+
+For thick lines → use quads, not GL_LINES
+
+🟢 BEST PRACTICE (production)
+
+Create one reusable class:
+
+Debug.drawLine(start, end, color);
+Debug.drawDottedLine(start, end, color);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
